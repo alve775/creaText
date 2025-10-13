@@ -1,0 +1,117 @@
+/* --- EXTENSION ISOLATION: prevent page CSS from leaking --- */
+.fai-bubble, .fai-bubble *, .fai-drawer, .fai-drawer * {
+  all: revert;
+  box-sizing: border-box;
+}
+.fai-bubble, .fai-drawer {
+  isolation: isolate;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+/* THEME */
+:root{
+  --fai-bg: rgba(17,24,39,.98);      /* panel bg (gray by default) */
+  --fai-surface: rgba(31,41,55,1);   /* sidebar */
+  --fai-border: #4b5563;
+  --fai-accent: #a3a3a3;
+  --fai-text: #e5e7eb;
+  --fai-radius: 18px;
+  --fai-shadow: 0 10px 24px rgba(0,0,0,.25);
+  --fai-z: 2147483647;
+  --fai-bubble-size: 44px;           /* adjustable in Settings */
+}
+
+/* Bubble (small, transparent) */
+.fai-bubble{
+  position: fixed; right: 18px; bottom: 18px;
+  width: var(--fai-bubble-size); height: var(--fai-bubble-size);
+  border-radius: 9999px;
+  background: #ffffffcc; border:1px solid #e5e7eb;
+  box-shadow: var(--fai-shadow);
+  display:flex; align-items:center; justify-content:center;
+  cursor: grab; z-index: var(--fai-z);
+}
+.fai-bubble:hover{ filter: brightness(1.02) }
+.fai-bubble .logo{ font:600 12px system-ui; color:#111 }
+
+/* Drawer */
+.fai-drawer{
+  position: fixed;
+  width: 560px; height: 420px; min-width: 500px; min-height: 320px;
+  display:flex; overflow:hidden; border-radius: var(--fai-radius);
+  background: var(--fai-bg); color: var(--fai-text);
+  border: 1px solid var(--fai-border);
+  box-shadow: var(--fai-shadow); z-index: var(--fai-z);
+  font: 14px/1.4 system-ui;
+}
+
+.fai-sidebar{
+  width: 160px; background: var(--fai-surface);
+  border-right: 1px solid var(--fai-border);
+  display:flex; flex-direction:column;
+}
+.fai-head{display:flex; align-items:center; gap:8px; padding:12px; border-bottom:1px solid var(--fai-border); cursor:move; user-select:none}
+.fai-title{font-weight:700}
+.fai-actions{margin-left:auto; display:flex; gap:6px}
+.fai-iconbtn{background:transparent; border:1px solid var(--fai-border); color:var(--fai-text); border-radius:10px; padding:4px 6px; cursor:pointer}
+.fai-iconbtn:hover{filter:brightness(1.1)}
+.fai-nav{display:flex; flex-direction:column; padding:8px}
+.fai-nav button{background:transparent; border:1px solid transparent; color:var(--fai-text); border-radius:10px; padding:8px; text-align:left; cursor:pointer}
+.fai-nav button.active, .fai-nav button:hover{border-color:var(--fai-border); background:rgba(0,0,0,.15)}
+
+.fai-body{flex:1; display:flex; flex-direction:column; min-width: 320px}
+
+/* ---------- Editor panel (grid) ---------- */
+.fai-pane{
+  display: grid;
+  grid-template-columns: 1fr 240px;  /* textarea | controls */
+  align-items: start;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px dashed var(--fai-border);
+}
+@media (max-width: 680px){
+  .fai-pane { grid-template-columns: 1fr; }
+  .fai-controls { order: 2; }
+}
+.fai-input{
+  width: 100%;
+  min-width: 0;
+  min-height: 160px;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  direction: ltr;
+  background: rgba(0,0,0,.25);
+  border: 1px solid var(--fai-border);
+  border-radius: 12px;
+  color: var(--fai-text);
+  padding: 10px;
+  outline: none;
+  resize: vertical;
+  font: 14px/1.4 system-ui;
+}
+.fai-controls{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fai-controls .options{ display:flex; align-items:center; gap:10px }
+.fai-controls .runbtn{
+  border-radius: 12px; padding: 10px 12px;
+  background: var(--fai-accent); color:#111; border:0; cursor:pointer
+}
+.fai-controls .runbtn:disabled{opacity:.6; cursor:not-allowed}
+
+/* ---------- Results & misc ---------- */
+.fai-results{flex:1; overflow:auto; padding:12px}
+.fai-result{background:rgba(0,0,0,.25); border:1px solid var(--fai-border); border-radius:12px; padding:10px; margin-bottom:10px; white-space:pre-wrap}
+.fai-add{display:flex; justify-content:center; padding:10px; border-top:1px solid var(--fai-border)}
+.fai-add button{background:transparent; border:1px dashed var(--fai-border); color:var(--fai-text); padding:8px 12px; border-radius:10px; cursor:pointer}
+.fai-add button:hover{border-color:var(--fai-accent)}
+
+.fai-resize{position:absolute; right:6px; bottom:6px; width:14px; height:14px; cursor:nwse-resize; opacity:.7}
+.fai-resize::after{content:''; position:absolute; right:0; bottom:0; width:100%; height:100%;
+  background: linear-gradient(135deg, transparent 50%, var(--fai-border) 50%)}
+.fai-status{position:absolute; left:8px; bottom:8px; font-size:12px; opacity:.8}
+.fai-settings { grid-template-columns: 1fr !important; }

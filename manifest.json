@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "CreaText",
+  "version": "1.0.0",
+  "description": "Floating bubble + drawer with summarize, tra...te, proofread, rewrite, write using Chrome’s built-in AI APIs.",
+  "action": { "default_title": "CreaText", "default_popup": "src/popup.html" },
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "src/bg.js", "type": "module" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.jsx"],
+      "run_at": "document_idle"
+    }
+  ]
+}
