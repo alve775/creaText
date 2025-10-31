@@ -1,4 +1,4 @@
-/* --- EXTENSION ISOLATION: prevent page CSS from leaking --- */
+/* ======================== ISOLATION ======================== */
 .fai-bubble, .fai-bubble *, .fai-drawer, .fai-drawer * {
   all: revert;
   box-sizing: border-box;
@@ -9,10 +9,10 @@
   will-change: transform, opacity;
 }
 
-/* THEME */
+/* ======================== THEME VARS (DEFAULTS) ======================== */
 :root{
-  --fai-bg: rgba(17,24,39,.98);      /* panel bg (gray by default) */
-  --fai-surface: rgba(31,41,55,1);   /* sidebar */
+  --fai-bg: rgba(17,24,39,.98);      /* panel (drawer & sidebar) background */
+  --fai-surface: rgba(31,41,55,1);   /* inner controls/bubble surface */
   --fai-border: #4b5563;
   --fai-accent: #a3a3a3;
   --fai-text: #e5e7eb;
@@ -22,20 +22,21 @@
   --fai-bubble-size: 44px;           /* adjustable in Settings */
 }
 
-/* Bubble (small, transparent) */
+/* ======================== BUBBLE ======================== */
 .fai-bubble{
   position: fixed; right: 18px; bottom: 18px;
   width: var(--fai-bubble-size); height: var(--fai-bubble-size);
   border-radius: 9999px;
-  background: #ffffffcc; border:1px solid #e5e7eb;
+  background: var(--fai-surface);
+  border: 1px solid var(--fai-border);
   box-shadow: var(--fai-shadow);
   display:flex; align-items:center; justify-content:center;
   cursor: grab; z-index: var(--fai-z);
 }
 .fai-bubble:hover{ filter: brightness(1.02) }
-.fai-bubble .logo{ font:600 12px system-ui; color:#111 }
+.fai-bubble .logo{ font:600 12px system-ui; color: var(--fai-text) }
 
-/* Drawer */
+/* ======================== DRAWER SHELL ======================== */
 .fai-drawer{
   position: fixed;
   width: 560px; height: 420px; min-width: 500px; min-height: 320px;
@@ -45,24 +46,37 @@
   box-shadow: var(--fai-shadow); z-index: var(--fai-z);
   font: 14px/1.4 system-ui;
 }
-
 .fai-sidebar{
-  width: 160px; background: var(--fai-surface);
+  width: 160px;
+  background: var(--fai-bg);              /* follows Panel Color */
   border-right: 1px solid var(--fai-border);
   display:flex; flex-direction:column;
 }
-.fai-head{display:flex; align-items:center; gap:8px; padding:12px; border-bottom:1px solid var(--fai-border); cursor:move; user-select:none}
+.fai-head{
+  display:flex; align-items:center; gap:8px; padding:12px;
+  border-bottom:1px solid var(--fai-border);
+  cursor:move; user-select:none
+}
 .fai-title{font-weight:700}
 .fai-actions{margin-left:auto; display:flex; gap:6px}
-.fai-iconbtn{background:transparent; border:1px solid var(--fai-border); color:var(--fai-text); border-radius:10px; padding:4px 6px; cursor:pointer}
+.fai-iconbtn{
+  background:transparent; border:1px solid var(--fai-border);
+  color:var(--fai-text); border-radius:10px; padding:4px 6px; cursor:pointer
+}
 .fai-iconbtn:hover{filter:brightness(1.1)}
+.fai-iconbtn:focus{ outline:2px solid var(--fai-accent); outline-offset:2px; }
+
 .fai-nav{display:flex; flex-direction:column; padding:8px}
-.fai-nav button{background:transparent; border:1px solid transparent; color:var(--fai-text); border-radius:10px; padding:8px; text-align:left; cursor:pointer}
-.fai-nav button.active, .fai-nav button:hover{border-color:var(--fai-border); background:rgba(0,0,0,.15)}
+.fai-nav button{
+  background:transparent; border:1px solid transparent; color:var(--fai-text);
+  border-radius:10px; padding:8px; text-align:left; cursor:pointer
+}
+.fai-nav button.active,
+.fai-nav button:hover{border-color:var(--fai-border); background:rgba(0,0,0,.15)}
 
 .fai-body{flex:1; display:flex; flex-direction:column; min-width: 320px}
 
-/* ---------- Editor panel (grid) ---------- */
+/* ======================== EDITOR PANE ======================== */
 .fai-pane{
   display: grid;
   grid-template-columns: 1fr 240px;  /* textarea | controls */
@@ -91,27 +105,290 @@
   resize: vertical;
   font: 14px/1.4 system-ui;
 }
-.fai-controls{
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.fai-controls .options{ display:flex; align-items:center; gap:10px }
+.fai-controls{ display: flex; flex-direction: column; gap: 8px; }
+.fai-controls .options{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .fai-controls .runbtn{
   border-radius: 12px; padding: 10px 12px;
-  background: var(--fai-accent); color:#111; border:0; cursor:pointer
+  background: var(--fai-accent); color:#111; border:0; cursor:pointer;
+  transition: opacity 0.3s ease;
 }
-.fai-controls .runbtn:disabled{opacity:.6; cursor:not-allowed}
+.fai-controls .runbtn:disabled{
+  opacity:.6; cursor:not-allowed;
+  animation: pulse 1.5s ease-in-out infinite;
+}
 
-/* ---------- Results & misc ---------- */
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.8; }
+}
+
+/* Textarea disabled state */
+.fai-input:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* ======================== RESULTS & MISC ======================== */
 .fai-results{flex:1; overflow:auto; padding:12px}
-.fai-result{background:rgba(0,0,0,.25); border:1px solid var(--fai-border); border-radius:12px; padding:10px; margin-bottom:10px; white-space:pre-wrap}
-.fai-add{display:flex; justify-content:center; padding:10px; border-top:1px solid var(--fai-border)}
-.fai-add button{background:transparent; border:1px dashed var(--fai-border); color:var(--fai-text); padding:8px 12px; border-radius:10px; cursor:pointer}
-.fai-add button:hover{border-color:var(--fai-accent)}
+.fai-result{
+  background:rgba(0,0,0,.25);
+  border:1px solid var(--fai-border);
+  border-radius:12px;
+  padding:10px; margin-bottom:10px; white-space:pre-wrap
+}
+.fai-status{
+  position:absolute; left:8px; bottom:8px; font-size:12px; opacity:.8;
+  font-weight: 500;
+}
+.fai-status:has(:first-child:contains('⏳')) {
+  animation: statusPulse 2s ease-in-out infinite;
+}
 
-.fai-resize{position:absolute; right:6px; bottom:6px; width:14px; height:14px; cursor:nwse-resize; opacity:.7}
-.fai-resize::after{content:''; position:absolute; right:0; bottom:0; width:100%; height:100%;
-  background: linear-gradient(135deg, transparent 50%, var(--fai-border) 50%)}
-.fai-status{position:absolute; left:8px; bottom:8px; font-size:12px; opacity:.8}
-.fai-settings { grid-template-columns: 1fr !important; }
+@keyframes statusPulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+.fai-resize{
+  position:absolute; right:6px; bottom:6px; width:14px; height:14px;
+  cursor:nwse-resize; opacity:.7
+}
+.fai-resize::after{
+  content:''; position:absolute; right:0; bottom:0; width:100%; height:100%;
+  background: linear-gradient(135deg, transparent 50%, var(--fai-border) 50%)
+}
+
+/* ======================== SETTINGS LAYOUT ======================== */
+.fai-settings {
+  grid-template-columns: 1fr !important;
+  padding: 16px 20px !important;  /* breathing room */
+  box-sizing: border-box;
+}
+.fai-settings .options { margin-bottom: 14px; }
+.fai-settings > .options:first-of-type {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--fai-border);
+  margin-bottom: 12px;
+}
+
+/* Themed select + themed "Use Default" button (with custom arrow) */
+.fai-select,
+.fai-reset-btn{
+  appearance: none; -webkit-appearance: none;
+  /* read --fai-surface-ctrl first (if provided), else fall back to --fai-surface */
+  background-color: var(--fai-surface-ctrl, var(--fai-surface));
+  color: var(--fai-text);
+  border: 1px solid var(--fai-border);
+  border-radius: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  line-height: 1.2;
+  box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
+  transition: filter .12s ease, background-color .12s ease, color .12s ease;
+}
+.fai-select{
+  padding-right: 32px;               /* room for arrow */
+  position: relative;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--fai-text) 50%),
+    linear-gradient(135deg, var(--fai-text) 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%,
+    0 0;
+  background-size: 6px 6px, 6px 6px, 100% 100%;
+  background-repeat: no-repeat;
+}
+.fai-reset-btn{ margin-left: 12px; }
+.fai-reset-btn:hover, .fai-select:hover { filter: brightness(1.05); }
+.fai-reset-btn:active, .fai-select:active { filter: brightness(1.1); }
+.fai-reset-btn:focus, .fai-select:focus { outline:2px solid var(--fai-accent); outline-offset:2px; }
+
+/* Make dropdown options themed too (Chrome) */
+.fai-select option {
+  background-color: var(--fai-surface-ctrl, var(--fai-surface));
+  color: var(--fai-text);
+}
+
+/* Hint text (shown when preset ≠ Custom) */
+.hint { opacity:.8; font-size:12px; padding:4px 2px 10px; }
+
+/* Responsive grid for color & sliders */
+.fai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.fai-grid.slim { grid-template-columns: 1fr; }
+
+/* ======================== COLOR SWATCH & POPOVER ======================== */
+.fai-color {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 10px;
+}
+.fai-color .fai-label { opacity: .95; }
+
+.fai-color .fai-color-swatch {
+  width: 36px; height: 36px; border-radius: 999px;
+  border: 2px solid var(--fai-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,.25) inset, 0 2px 8px rgba(0,0,0,.2);
+  cursor: pointer;
+}
+
+/* ======================== CENTERED COLOR MODAL ======================== */
+.fai-modal {
+  position: absolute; /* stays inside .fai-drawer */
+  inset: 0;
+  background: rgba(0,0,0,.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: calc(var(--fai-z) + 2);
+}
+.fai-modal-box {
+  background: var(--fai-bg);
+  border: 1px solid var(--fai-border);
+  border-radius: 14px;
+  box-shadow: var(--fai-shadow);
+  padding: 14px;
+  width: min(480px, 92%);
+}
+.fai-modal-title { font-weight: 600; margin-bottom: 6px; }
+
+.fai-pop-row {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+.fai-color-native {
+  appearance: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 1px solid var(--fai-border);
+  padding: 0;
+  background: transparent;
+}
+.fai-color-native::-webkit-color-swatch-wrapper { padding: 0; border-radius: 12px; }
+.fai-color-native::-webkit-color-swatch { border: none; border-radius: 12px; }
+
+.fai-color-text {
+  background: var(--fai-surface-ctrl, var(--fai-surface));
+  color: var(--fai-text);
+  border: 1px solid var(--fai-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  width: 100%;
+  font: 14px/1.2 system-ui;
+}
+.fai-pop-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+.fai-pop-btn {
+  background: transparent; border: 1px solid var(--fai-border);
+  color: var(--fai-text); border-radius: 10px; padding: 6px 10px; cursor: pointer;
+}
+.fai-pop-btn:hover { border-color: var(--fai-accent); }
+.fai-pop-btn:focus { outline:2px solid var(--fai-accent); outline-offset:2px; }
+
+/* ======================== BEAUTIFUL THEMED RANGE SLIDER ======================== */
+.fai-range{
+  appearance: none; -webkit-appearance: none;
+  width: 220px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid var(--fai-border);
+  background:
+    linear-gradient(to right,
+      var(--fai-accent) 0%,
+      var(--fai-accent) var(--val, 50%),
+      rgba(255,255,255,.14) var(--val, 50%),
+      rgba(255,255,255,.14) 100%);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.25);
+  outline: none;
+}
+.fai-range:hover{ filter: brightness(1.03); }
+.fai-range:focus{ outline:2px solid var(--fai-accent); outline-offset:2px; }
+
+/* Chrome/Safari */
+.fai-range::-webkit-slider-thumb{
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--fai-surface-ctrl, var(--fai-surface));
+  border: 2px solid var(--fai-accent);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.15);
+  margin-top: -4px; /* centers thumb on 12px track */
+  transition: transform .12s ease;
+}
+.fai-range:hover::-webkit-slider-thumb{ transform: scale(1.05); }
+.fai-range:active::-webkit-slider-thumb{ transform: scale(1.12); }
+
+/* Firefox */
+.fai-range::-moz-range-track{
+  height: 12px; border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  border: 1px solid var(--fai-border);
+}
+.fai-range::-moz-range-progress{
+  height: 12px; border-radius: 999px;
+  background: var(--fai-accent);
+  border: 1px solid var(--fai-border);
+}
+.fai-range::-moz-range-thumb{
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--fai-surface-ctrl, var(--fai-surface));
+  border: 2px solid var(--fai-accent);
+}
+
+/* ======================== THEME PRESETS ======================== */
+.theme-ocean {
+  --fai-bg: rgba(10, 20, 35, 0.96);
+  --fai-surface: #0b223d;
+  --fai-text: #e6f2ff;
+  --fai-border: #1e3a5f;
+  --fai-accent: #60a5fa;
+}
+.theme-forest {
+  --fai-bg: rgba(14, 24, 19, 0.96);
+  --fai-surface: #0f2922;
+  --fai-text: #e8f5f0;
+  --fai-border: #1c3b33;
+  --fai-accent: #34d399;
+}
+.theme-midnight {
+  --fai-bg: rgba(15, 15, 19, 0.96);
+  --fai-surface: #151826;
+  --fai-text: #f3f4f6;
+  --fai-border: #262a40;
+  --fai-accent: #a78bfa;
+}
+.theme-sunrise {
+  --fai-bg: rgba(255, 248, 240, 0.96);
+  --fai-surface: #fff0e1;
+  --fai-text: #2b1a10;
+  --fai-border: #ffd8b5;
+  --fai-accent: #fb923c;
+}
+.theme-lavender {
+  --fai-bg: rgba(248, 245, 255, 0.96);
+  --fai-surface: #efeaff;
+  --fai-text: #231b3a;
+  --fai-border: #d9ccff;
+  --fai-accent: #7c3aed;
+}
+
+/* ======================== THEMED SELECTS (USABILITY) ======================== */
+.fai-settings select,
+.fai-settings option {
+  background-color: var(--fai-surface-ctrl, var(--fai-surface));
+  color: var(--fai-text);
+}
+.fai-settings select:focus,
+.fai-settings option:hover,
+.fai-settings option:focus {
+  background-color: var(--fai-accent);
+  color: #111; /* ensure contrast on highlight */
+}
+
+/* Optional: stronger focus rings on key widgets */
+.fai-nav button:focus,
+.fai-select:focus,
+.fai-reset-btn:focus { outline:2px solid var(--fai-accent); outline-offset:2px; }
